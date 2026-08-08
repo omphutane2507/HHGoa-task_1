@@ -19,6 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let uploadedImage = null;
     let generatedImageUrl = null;
+    
+    // Preload the Goa SVG logo
+    const goaLogo = new Image();
+    goaLogo.src = 'goa_hindi.svg';
 
     const BUILDER_TITLES = [
         "10X SHIPPER",
@@ -114,23 +118,21 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fillText('HACKER HOUSE', WIDTH / 2, (margin + 150) / 1.4);
         ctx.restore();
 
-        // 4. Hindi Text Overlay (Pink, Sans, with White Stroke)
+        // 4. Goa SVG Overlay
         ctx.save();
-        ctx.font = '900 70px sans-serif';
-        ctx.textAlign = 'center';
-        
         // Add shadow for depth
         ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
         ctx.shadowBlur = 10;
         ctx.shadowOffsetX = 3;
         ctx.shadowOffsetY = 3;
 
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 3;
-        ctx.strokeText('गोवा', WIDTH / 2, margin + 140);
+        if (goaLogo.complete && goaLogo.naturalWidth > 0) {
+            const logoWidth = 140; // Reduced size
+            const logoHeight = (logoWidth / goaLogo.width) * goaLogo.height;
+            // Draw slightly lower so it centers nicely over the text
+            ctx.drawImage(goaLogo, (WIDTH - logoWidth) / 2, margin + 110, logoWidth, logoHeight);
+        }
         
-        ctx.fillStyle = '#ec0d68'; // Pink
-        ctx.fillText('गोवा', WIDTH / 2, margin + 140);
         ctx.restore();
 
         // 5. Subheader Date & Location
