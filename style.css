@@ -1,0 +1,331 @@
+:root {
+    --bg-color: #136c39;
+    --surface-color: #0f592f;
+    --border-color: #0a4523;
+    --text-primary: #f8e31a; /* Yellow */
+    --text-secondary: #f8e31a; /* Yellow */
+    --text-dark: #000000;
+    --accent-color: #ec0d68; /* Pink */
+    --accent-hover: #ff1c7a;
+    --note-bg: #fffbf0;
+    
+    --font-serif: 'Playfair Display', serif;
+    --font-mono: 'Space Mono', monospace;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    background-image: radial-gradient(circle at center, #167e43 0%, #136c39 100%);
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header {
+    margin-bottom: 4rem;
+    text-align: center;
+    position: relative;
+}
+
+.brand {
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.brand span {
+    color: var(--text-primary);
+}
+
+header h1 {
+    font-family: var(--font-serif);
+    font-size: 8rem;
+    font-weight: 400;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    transform: scaleY(1.3);
+    line-height: 0.9;
+    position: relative;
+    display: inline-block;
+}
+
+/* The Hindi Text Overlay imitation */
+header h1::after {
+    content: "गोवा";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: sans-serif;
+    font-size: 4rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    text-shadow: 0 0 10px rgba(236, 13, 104, 0.5);
+    z-index: 10;
+    -webkit-text-stroke: 1px #fff;
+}
+
+header p {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    margin-top: 2rem;
+}
+
+.app-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .app-layout {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    header h1 {
+        font-size: 4rem;
+    }
+    header h1::after {
+        font-size: 2rem;
+    }
+    .brand {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+}
+
+.controls-section {
+    background-color: var(--note-bg);
+    color: var(--text-dark);
+    border: 2px solid var(--border-color);
+    padding: 2.5rem;
+    border-radius: 4px;
+    box-shadow: 10px 10px 0 rgba(0,0,0,0.2);
+    position: relative;
+    transform: rotate(-1deg);
+}
+
+/* Post-it pin */
+.controls-section::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3), 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: var(--text-dark);
+    font-weight: 700;
+}
+
+input[type="text"] {
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px dashed #ccc;
+    color: var(--text-dark);
+    padding: 0.5rem 0;
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+input[type="text"]:focus {
+    border-color: var(--accent-color);
+}
+
+.file-upload-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 1.5rem 1rem;
+    background-color: rgba(0,0,0,0.02);
+    border: 2px dashed #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.file-upload-label:hover {
+    border-color: var(--accent-color);
+    background-color: rgba(236, 13, 104, 0.05);
+}
+
+.file-upload-label span {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    font-weight: 700;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.primary-btn {
+    width: 100%;
+    background-color: var(--accent-color);
+    color: #fff;
+    border: none;
+    padding: 1rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 50px;
+    margin-top: 1rem;
+    transition: transform 0.1s ease, background-color 0.2s ease;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+}
+
+.primary-btn:hover {
+    background-color: var(--accent-hover);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 rgba(0,0,0,0.2);
+}
+
+.primary-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 rgba(0,0,0,0.2);
+}
+
+.actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.actions.hidden {
+    display: none;
+}
+
+.action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: var(--text-primary);
+    border: 2px solid var(--accent-color);
+    color: var(--bg-color);
+    padding: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 0;
+    transition: all 0.2s ease;
+    box-shadow: 3px 3px 0 var(--accent-color);
+}
+
+.action-btn:hover {
+    background-color: #fff;
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--accent-color);
+}
+
+.x-btn {
+    background-color: #000;
+    color: #fff;
+    border-color: #000;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+}
+
+.x-btn:hover {
+    background-color: #222;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+}
+
+.preview-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.canvas-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 4/5;
+    background-color: var(--note-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 0px;
+    overflow: hidden;
+    box-shadow: 15px 15px 0 rgba(0,0,0,0.25);
+    transform: rotate(2deg);
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.placeholder-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    color: rgba(0,0,0,0.1);
+    font-size: 4rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    pointer-events: none;
+    transform: scaleY(1.3);
+}
+
+.placeholder-overlay.hidden {
+    display: none;
+}
