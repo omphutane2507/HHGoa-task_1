@@ -24,6 +24,11 @@
 
         <main class="app-layout">
             <div class="controls-section">
+                <div class="template-selector">
+                    <button class="template-btn active" data-template="builderID">BUILDER ID</button>
+                    <button class="template-btn" data-template="frame">FRAME</button>
+                </div>
+
                 <form id="generator-form">
                     <div class="input-group">
                         <label for="photo-upload" class="file-upload-label" id="file-upload-label">
@@ -32,17 +37,67 @@
                         </label>
                     </div>
 
-                    <div class="input-group">
-                        <label for="builder-name">Name / Alias</label>
-                        <input type="text" id="builder-name" placeholder="e.g. Satoshi" required maxlength="20" autocomplete="off">
+                    <div class="settings-panel hidden" id="frame-themes-panel">
+                        <div class="settings-header">FRAME THEME</div>
+                        <div class="theme-buttons" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button type="button" class="tool-btn theme-btn active" data-theme="default">Classic</button>
+                            <button type="button" class="tool-btn theme-btn" data-theme="beach">Beach </button>
+                            <button type="button" class="tool-btn theme-btn" data-theme="party">Party </button>
+                            <button type="button" class="tool-btn theme-btn" data-theme="beer">Beer </button>
+                            <button type="button" class="tool-btn theme-btn" data-theme="tree">Jungle </button>
+                        </div>
                     </div>
 
-                    <div class="input-group">
-                        <label for="builder-stack">Stack / Role</label>
-                        <input type="text" id="builder-stack" placeholder="e.g. Full-Stack / Rust" required maxlength="25" autocomplete="off">
+                    <div class="settings-panel hidden" id="photo-tools">
+                        <div class="settings-header">PHOTO ADJUSTMENTS</div>
+                        <div class="sliders">
+                            <div class="slider-row">
+                                <label>Zoom</label>
+                                <input type="range" id="zoom-slider" min="0.5" max="3" step="0.05" value="1">
+                            </div>
+                            <div class="slider-row">
+                                <label>Rotate</label>
+                                <input type="range" id="rotate-slider" min="-180" max="180" step="1" value="0">
+                            </div>
+                            <div class="slider-row">
+                                <label>Light</label>
+                                <input type="range" id="brightness-slider" min="0" max="2" step="0.05" value="1">
+                            </div>
+                        </div>
+                        <div class="tool-actions">
+                            <button type="button" id="auto-fit-btn" class="tool-btn">Auto Fit</button>
+                            <button type="button" id="flip-btn" class="tool-btn">Flip</button>
+                            <button type="button" id="reset-photo-btn" class="tool-btn">Reset</button>
+                        </div>
                     </div>
 
-                    <button type="submit" id="generate-btn" class="primary-btn">GENERATE ID CARD</button>
+                    <div id="details-section">
+                        <div class="input-group">
+                            <label for="builder-name">Name / Alias</label>
+                            <input type="text" id="builder-name" placeholder="e.g. Satoshi" required maxlength="20" autocomplete="off">
+                        </div>
+
+                        <div class="input-group" id="stack-input-group">
+                            <label for="builder-stack">Stack / Role</label>
+                            <input type="text" id="builder-stack" placeholder="e.g. Full-Stack / Rust" required maxlength="25" autocomplete="off">
+                        </div>
+                        
+                        <div class="input-group" id="title-input-group">
+                            <label>Builder Class 1</label>
+                            <div class="title-display-box">
+                                <span id="builder-title">THE SHIPPER</span>
+                                <button type="button" id="regenerate-title-btn" class="icon-btn" title="Regenerate">↻</button>
+                            </div>
+                        </div>
+                        <div class="input-group" id="title2-input-group">
+                            <label>Builder Class 2 (Optional)</label>
+                            <div class="title-display-box">
+                                <span id="builder-title-2">FULL-STACK WIZARD</span>
+                                <button type="button" id="regenerate-title-2-btn" class="icon-btn" title="Regenerate">↻</button>
+                                <button type="button" id="clear-title-2-btn" class="icon-btn" title="Clear" style="color: #ec0d68; font-weight: bold;">✕</button>
+                            </div>
+                        </div>
+                    </div>
                 </form>
                 
                 <div id="actions-section" class="actions hidden">
