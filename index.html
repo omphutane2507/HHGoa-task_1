@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,40 +8,65 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
     <!-- HEIC to JPG conversion library -->
     <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 </head>
+
 <body>
     <div class="container">
         <header>
-            <div class="brand">HH GOA <span>2026</span></div>
-            <div class="hero-title-container">
-                <h1>BUILDER ID GENERATOR</h1>
+            <h1 class="main-brand">HH GOA <span class="year-span">2026</span></h1>
+            <div class="hanging-logo-container">
                 <img src="goa_hindi.svg" alt="Goa in Hindi" class="goa-hindi-img">
             </div>
-            <p>Less Noise. More Signal. Generate your official radar card.</p>
+            <h2 id="hero-title" class="sub-hero-title">BUILDER ID & PFP FRAME GENERATOR</h2>
+            <p id="hero-subtitle">Less Noise. More Signal. Select an option to start.</p>
         </header>
 
-        <main class="app-layout">
+        <!-- Initial Screen: Choice of 2 Buttons -->
+        <div id="selection-screen" class="selection-screen">
+            <div class="selection-card">
+                <h2 class="selection-heading">SELECT AN OPTION TO START</h2>
+                <div class="choice-buttons-grid">
+                    <button type="button" class="choice-btn" data-template="builderID">
+                        <span class="choice-icon">🪪</span>
+                        <span class="choice-title">BUILDER ID CARD</span>
+                        <span class="choice-desc">Official event badge with photo, name, stack & builder titles</span>
+                    </button>
+                    <button type="button" class="choice-btn" data-template="frame">
+                        <span class="choice-icon">🖼️</span>
+                        <span class="choice-title">PFP FRAME</span>
+                        <span class="choice-desc">Branded HH Goa 2026 profile picture overlay for X</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generator Workspace (Hidden initially until user selects an option) -->
+        <main class="app-layout hidden" id="workspace-screen">
             <div class="controls-section">
-                <div class="template-selector">
-                    <button class="template-btn active" data-template="builderID">BUILDER ID</button>
-                    <button class="template-btn" data-template="frame">FRAME</button>
+                <div class="workspace-nav">
+                    <button type="button" id="back-to-selection-btn" class="back-btn">← CHANGE OPTION</button>
+                    <div class="active-mode-badge" id="active-mode-badge">BUILDER ID CARD</div>
                 </div>
 
                 <form id="generator-form">
                     <div class="input-group">
                         <label for="photo-upload" class="file-upload-label" id="file-upload-label">
                             <span id="file-name">UPLOAD YOUR PHOTO (JPG, PNG, HEIC)</span>
-                            <input type="file" id="photo-upload" accept="image/jpeg, image/png, image/heic, .heic" required>
+                            <input type="file" id="photo-upload" accept="image/jpeg, image/png, image/heic, .heic"
+                                required>
                         </label>
                     </div>
 
                     <div class="settings-panel hidden" id="frame-themes-panel">
                         <div class="settings-header">FRAME THEME</div>
                         <div class="theme-buttons" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            <button type="button" class="tool-btn theme-btn active" data-theme="default">Classic</button>
+                            <button type="button" class="tool-btn theme-btn active"
+                                data-theme="default">Classic</button>
                             <button type="button" class="tool-btn theme-btn" data-theme="beach">Beach </button>
                             <button type="button" class="tool-btn theme-btn" data-theme="party">Party </button>
                             <button type="button" class="tool-btn theme-btn" data-theme="beer">Beer </button>
@@ -74,39 +100,52 @@
                     <div id="details-section">
                         <div class="input-group">
                             <label for="builder-name">Name / Alias</label>
-                            <input type="text" id="builder-name" placeholder="e.g. Satoshi" required maxlength="20" autocomplete="off">
+                            <input type="text" id="builder-name" placeholder="e.g. Satoshi" required maxlength="20"
+                                autocomplete="off">
                         </div>
 
                         <div class="input-group" id="stack-input-group">
                             <label for="builder-stack">Stack / Role</label>
-                            <input type="text" id="builder-stack" placeholder="e.g. Full-Stack / Rust" required maxlength="25" autocomplete="off">
+                            <input type="text" id="builder-stack" placeholder="e.g. Full-Stack / Rust" required
+                                maxlength="25" autocomplete="off">
                         </div>
-                        
+
                         <div class="input-group" id="title-input-group">
                             <label>Builder Class 1</label>
                             <div class="title-display-box">
                                 <span id="builder-title">THE SHIPPER</span>
-                                <button type="button" id="regenerate-title-btn" class="icon-btn" title="Regenerate">↻</button>
+                                <button type="button" id="regenerate-title-btn" class="icon-btn"
+                                    title="Regenerate">↻</button>
                             </div>
                         </div>
                         <div class="input-group" id="title2-input-group">
                             <label>Builder Class 2 (Optional)</label>
                             <div class="title-display-box">
                                 <span id="builder-title-2">FULL-STACK WIZARD</span>
-                                <button type="button" id="regenerate-title-2-btn" class="icon-btn" title="Regenerate">↻</button>
-                                <button type="button" id="clear-title-2-btn" class="icon-btn" title="Clear" style="color: #ec0d68; font-weight: bold;">✕</button>
+                                <button type="button" id="regenerate-title-2-btn" class="icon-btn"
+                                    title="Regenerate">↻</button>
+                                <button type="button" id="clear-title-2-btn" class="icon-btn" title="Clear"
+                                    style="color: #ec0d68; font-weight: bold;">✕</button>
                             </div>
                         </div>
                     </div>
                 </form>
-                
+
                 <div id="actions-section" class="actions hidden">
                     <button id="download-btn" class="action-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
                         DOWNLOAD
                     </button>
                     <button id="share-btn" class="action-btn x-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
                         SHARE ON X
                     </button>
                 </div>
@@ -122,7 +161,8 @@
             </div>
         </main>
     </div>
-    
+
     <script src="app.js"></script>
 </body>
+
 </html>
