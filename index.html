@@ -1,168 +1,288 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HH Goa 2026 - ID Generator</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
-        rel="stylesheet">
-    <!-- HEIC to JPG conversion library -->
-    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-</head>
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- HEIC to JPG conversion library - Using unpkg for better version support -->
+    <script src="https://unpkg.com/heic2any@latest/dist/heic2any.min.js"></script>
+  </head>
 
-<body>
+  <body>
     <div class="container">
-        <header>
-            <h1 class="main-brand">HH GOA <span class="year-span">2026</span></h1>
-            <div class="hanging-logo-container">
-                <img src="goa_hindi.svg" alt="Goa in Hindi" class="goa-hindi-img">
-            </div>
-            <h2 id="hero-title" class="sub-hero-title">BUILDER ID & PFP FRAME GENERATOR</h2>
-            <p id="hero-subtitle">Less Noise. More Signal. Select an option to start.</p>
-        </header>
+      <header>
+        <h1 class="main-brand">HH GOA <span class="year-span">2026</span></h1>
+        <div class="hanging-logo-container">
+          <img src="goa_hindi.svg" alt="Goa in Hindi" class="goa-hindi-img" />
+        </div>
+        <h2 id="hero-title" class="sub-hero-title">
+          BUILDER ID & PFP FRAME GENERATOR
+        </h2>
+        <p id="hero-subtitle">
+          Less Noise. More Signal. Select an option to start.
+        </p>
+      </header>
 
-        <!-- Initial Screen: Choice of 2 Buttons -->
-        <div id="selection-screen" class="selection-screen">
-            <div class="selection-card">
-                <h2 class="selection-heading">SELECT AN OPTION TO START</h2>
-                <div class="choice-buttons-grid">
-                    <button type="button" class="choice-btn" data-template="builderID">
-                        <span class="choice-icon">🪪</span>
-                        <span class="choice-title">BUILDER ID CARD</span>
-                        <span class="choice-desc">Official event badge with photo, name, stack & builder titles</span>
-                    </button>
-                    <button type="button" class="choice-btn" data-template="frame">
-                        <span class="choice-icon">🖼️</span>
-                        <span class="choice-title">PFP FRAME</span>
-                        <span class="choice-desc">Branded HH Goa 2026 profile picture overlay for X</span>
-                    </button>
-                </div>
+      <!-- Initial Screen: Choice of 2 Buttons -->
+      <div id="selection-screen" class="selection-screen">
+        <div class="selection-card">
+          <h2 class="selection-heading">SELECT AN OPTION TO START</h2>
+          <div class="choice-buttons-grid choice-buttons-grid--3">
+            <button type="button" class="choice-btn" data-template="builderID">
+              <span class="choice-icon">🪪</span>
+              <span class="choice-title">BUILDER ID CARD</span>
+              <span class="choice-desc"
+                >Official event badge with photo, name, stack & builder
+                titles</span
+              >
+            </button>
+            <button type="button" class="choice-btn" data-template="frame">
+              <span class="choice-icon">🖼️</span>
+              <span class="choice-title">PFP FRAME</span>
+              <span class="choice-desc">Branded HH Goa 2026 profile picture overlay for X</span>
+            </button>
+            <button type="button" class="choice-btn" data-template="teamID">
+              <span class="choice-icon">👥</span>
+              <span class="choice-title">TEAM ID CARD</span>
+              <span class="choice-desc">Team badge with photo, team name & up to 3 members</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Generator Workspace (Hidden initially until user selects an option) -->
+      <main class="app-layout hidden" id="workspace-screen">
+        <div class="controls-section">
+          <div class="workspace-nav">
+            <button type="button" id="back-to-selection-btn" class="back-btn">
+              ← CHANGE OPTION
+            </button>
+            <div class="active-mode-badge" id="active-mode-badge">
+              BUILDER ID CARD
             </div>
+          </div>
+
+          <form id="generator-form">
+            <div class="input-group">
+              <label
+                for="photo-upload"
+                class="file-upload-label"
+                id="file-upload-label"
+              >
+                <span id="file-name">UPLOAD YOUR PHOTO (JPG, PNG, HEIC)</span>
+                <input
+                  type="file"
+                  id="photo-upload"
+                  accept="image/jpeg, image/png, image/heic, image/heif, .heic, .heif"
+                />
+              </label>
+              <button type="button" id="capture-btn" class="capture-btn">
+                📷 CAPTURE NOW
+              </button>
+            </div>
+
+            <!-- Camera Modal -->
+            <div id="camera-modal" class="camera-modal hidden">
+              <div class="camera-modal-inner">
+                <video id="camera-video" autoplay playsinline muted></video>
+                <canvas id="camera-snap-canvas" style="display: none"></canvas>
+                <div class="camera-modal-actions">
+                  <button type="button" id="snap-btn" class="action-btn">
+                    📸 SNAP
+                  </button>
+                  <button
+                    type="button"
+                    id="close-camera-btn"
+                    class="action-btn x-btn"
+                  >
+                    ✕ CLOSE
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-panel hidden" id="photo-tools">
+              <div class="settings-header">PHOTO ADJUSTMENTS</div>
+              <div class="sliders">
+                <div class="slider-row">
+                  <label>Zoom</label>
+                  <input
+                    type="range"
+                    id="zoom-slider"
+                    min="0.5"
+                    max="3"
+                    step="0.05"
+                    value="1"
+                  />
+                </div>
+                <div class="slider-row">
+                  <label>Rotate</label>
+                  <input
+                    type="range"
+                    id="rotate-slider"
+                    min="-180"
+                    max="180"
+                    step="1"
+                    value="0"
+                  />
+                </div>
+                <div class="slider-row">
+                  <label>Light</label>
+                  <input
+                    type="range"
+                    id="brightness-slider"
+                    min="0"
+                    max="2"
+                    step="0.05"
+                    value="1"
+                  />
+                </div>
+              </div>
+              <div class="tool-actions">
+                <button type="button" id="auto-fit-btn" class="tool-btn">
+                  Auto Fit
+                </button>
+                <button type="button" id="flip-btn" class="tool-btn">
+                  Flip
+                </button>
+                <button type="button" id="reset-photo-btn" class="tool-btn">
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <!-- Team ID Section -->
+            <div id="team-details-section" class="hidden">
+              <div class="input-group">
+                <label for="team-name">Team Name</label>
+                <input type="text" id="team-name" placeholder="e.g. Team Solana" maxlength="14" autocomplete="off" />
+              </div>
+              <div class="input-group">
+                <label>Team Members (up to 3)</label>
+                <input type="text" id="team-member-1" placeholder="Member 1" maxlength="20" autocomplete="off" style="margin-bottom:0.5rem" />
+                <input type="text" id="team-member-2" placeholder="Member 2" maxlength="20" autocomplete="off" style="margin-bottom:0.5rem" />
+                <input type="text" id="team-member-3" placeholder="Member 3" maxlength="20" autocomplete="off" />
+              </div>
+              <p style="font-size:0.78rem;color:#555;margin-top:0.5rem;font-weight:700">💡 Drag member names on the canvas to reposition them</p>
+            </div>
+
+            <div id="details-section">
+              <div class="input-group">
+                <label for="builder-name">Name / Alias</label>
+                <input
+                  type="text"
+                  id="builder-name"
+                  placeholder="e.g. Satoshi"
+                  required
+                  maxlength="15"
+                  autocomplete="off"
+                />
+              </div>
+
+              <div class="input-group" id="stack-input-group">
+                <label for="builder-stack">Stack / Role</label>
+                <input
+                  type="text"
+                  id="builder-stack"
+                  placeholder="e.g. Full-Stack / Rust"
+                  required
+                  maxlength="12"
+                  autocomplete="off"
+                />
+              </div>
+
+              <div class="input-group" id="title-input-group">
+                <label>Builder Class 1</label>
+                <div class="title-display-box">
+                  <span id="builder-title">THE SHIPPER</span>
+                  <button
+                    type="button"
+                    id="regenerate-title-btn"
+                    class="icon-btn"
+                    title="Regenerate"
+                  >
+                    ↻
+                  </button>
+                </div>
+              </div>
+              <div class="input-group" id="title2-input-group">
+                <label>Builder Class 2 (Optional)</label>
+                <div class="title-display-box">
+                  <span id="builder-title-2">FULL-STACK WIZARD</span>
+                  <button
+                    type="button"
+                    id="regenerate-title-2-btn"
+                    class="icon-btn"
+                    title="Regenerate"
+                  >
+                    ↻
+                  </button>
+                  <button
+                    type="button"
+                    id="clear-title-2-btn"
+                    class="icon-btn"
+                    title="Clear"
+                    style="color: #ec0d68; font-weight: bold"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          <div id="actions-section" class="actions hidden">
+            <button id="download-btn" class="action-btn">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              DOWNLOAD
+            </button>
+            <button id="share-btn" class="action-btn x-btn">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                />
+              </svg>
+              SHARE ON X
+            </button>
+          </div>
         </div>
 
-        <!-- Generator Workspace (Hidden initially until user selects an option) -->
-        <main class="app-layout hidden" id="workspace-screen">
-            <div class="controls-section">
-                <div class="workspace-nav">
-                    <button type="button" id="back-to-selection-btn" class="back-btn">← CHANGE OPTION</button>
-                    <div class="active-mode-badge" id="active-mode-badge">BUILDER ID CARD</div>
-                </div>
-
-                <form id="generator-form">
-                    <div class="input-group">
-                        <label for="photo-upload" class="file-upload-label" id="file-upload-label">
-                            <span id="file-name">UPLOAD YOUR PHOTO (JPG, PNG, HEIC)</span>
-                            <input type="file" id="photo-upload" accept="image/jpeg, image/png, image/heic, .heic"
-                                required>
-                        </label>
-                    </div>
-
-                    <div class="settings-panel hidden" id="frame-themes-panel">
-                        <div class="settings-header">FRAME THEME</div>
-                        <div class="theme-buttons" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            <button type="button" class="tool-btn theme-btn active"
-                                data-theme="default">Classic</button>
-                            <button type="button" class="tool-btn theme-btn" data-theme="beach">Beach </button>
-                            <button type="button" class="tool-btn theme-btn" data-theme="party">Party </button>
-                            <button type="button" class="tool-btn theme-btn" data-theme="beer">Beer </button>
-                            <button type="button" class="tool-btn theme-btn" data-theme="tree">Jungle </button>
-                        </div>
-                    </div>
-
-                    <div class="settings-panel hidden" id="photo-tools">
-                        <div class="settings-header">PHOTO ADJUSTMENTS</div>
-                        <div class="sliders">
-                            <div class="slider-row">
-                                <label>Zoom</label>
-                                <input type="range" id="zoom-slider" min="0.5" max="3" step="0.05" value="1">
-                            </div>
-                            <div class="slider-row">
-                                <label>Rotate</label>
-                                <input type="range" id="rotate-slider" min="-180" max="180" step="1" value="0">
-                            </div>
-                            <div class="slider-row">
-                                <label>Light</label>
-                                <input type="range" id="brightness-slider" min="0" max="2" step="0.05" value="1">
-                            </div>
-                        </div>
-                        <div class="tool-actions">
-                            <button type="button" id="auto-fit-btn" class="tool-btn">Auto Fit</button>
-                            <button type="button" id="flip-btn" class="tool-btn">Flip</button>
-                            <button type="button" id="reset-photo-btn" class="tool-btn">Reset</button>
-                        </div>
-                    </div>
-
-                    <div id="details-section">
-                        <div class="input-group">
-                            <label for="builder-name">Name / Alias</label>
-                            <input type="text" id="builder-name" placeholder="e.g. Satoshi" required maxlength="20"
-                                autocomplete="off">
-                        </div>
-
-                        <div class="input-group" id="stack-input-group">
-                            <label for="builder-stack">Stack / Role</label>
-                            <input type="text" id="builder-stack" placeholder="e.g. Full-Stack / Rust" required
-                                maxlength="25" autocomplete="off">
-                        </div>
-
-                        <div class="input-group" id="title-input-group">
-                            <label>Builder Class 1</label>
-                            <div class="title-display-box">
-                                <span id="builder-title">THE SHIPPER</span>
-                                <button type="button" id="regenerate-title-btn" class="icon-btn"
-                                    title="Regenerate">↻</button>
-                            </div>
-                        </div>
-                        <div class="input-group" id="title2-input-group">
-                            <label>Builder Class 2 (Optional)</label>
-                            <div class="title-display-box">
-                                <span id="builder-title-2">FULL-STACK WIZARD</span>
-                                <button type="button" id="regenerate-title-2-btn" class="icon-btn"
-                                    title="Regenerate">↻</button>
-                                <button type="button" id="clear-title-2-btn" class="icon-btn" title="Clear"
-                                    style="color: #ec0d68; font-weight: bold;">✕</button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-
-                <div id="actions-section" class="actions hidden">
-                    <button id="download-btn" class="action-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7 10 12 15 17 10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                        DOWNLOAD
-                    </button>
-                    <button id="share-btn" class="action-btn x-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                        </svg>
-                        SHARE ON X
-                    </button>
-                </div>
+        <div class="preview-section">
+          <div class="canvas-container" id="canvas-wrapper">
+            <canvas id="id-canvas"></canvas>
+            <div id="placeholder-overlay" class="placeholder-overlay">
+              PREVIEW
             </div>
-
-            <div class="preview-section">
-                <div class="canvas-container" id="canvas-wrapper">
-                    <canvas id="id-canvas"></canvas>
-                    <div id="placeholder-overlay" class="placeholder-overlay">
-                        PREVIEW
-                    </div>
-                </div>
-            </div>
-        </main>
+          </div>
+        </div>
+      </main>
     </div>
 
     <script src="app.js"></script>
-</body>
-
+  </body>
 </html>

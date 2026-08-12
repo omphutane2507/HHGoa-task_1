@@ -1,0 +1,16 @@
+# Dependency directories
+node_modules/
+
+# Python Virtual Environments
+.venv/
+venv/
+
+# Uploads / Temp files
+uploads/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env

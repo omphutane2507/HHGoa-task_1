@@ -455,6 +455,23 @@ canvas {
     gap: 2rem;
 }
 
+.choice-buttons-grid--3 {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+@media (max-width: 800px) {
+    .choice-buttons-grid--3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.drag-hint {
+    font-size: 0.78rem;
+    color: #555;
+    margin-top: 0.5rem;
+    font-weight: 700;
+}
+
 @media (max-width: 700px) {
     .choice-buttons-grid {
         grid-template-columns: 1fr;
@@ -489,9 +506,22 @@ canvas {
     box-shadow: 12px 12px 0 #000;
 }
 
-.choice-btn:hover .choice-title,
-.choice-btn:hover .choice-desc {
+.choice-btn[data-template="teamID"]:hover {
+    background-color: #f8e31a;
+    transform: translate(-3px, -3px);
+    box-shadow: 12px 12px 0 #000;
+}
+
+.choice-btn[data-template="builderID"]:hover .choice-title,
+.choice-btn[data-template="builderID"]:hover .choice-desc,
+.choice-btn[data-template="frame"]:hover .choice-title,
+.choice-btn[data-template="frame"]:hover .choice-desc {
     color: #ffffff;
+}
+
+.choice-btn[data-template="teamID"]:hover .choice-title,
+.choice-btn[data-template="teamID"]:hover .choice-desc {
+    color: #000;
 }
 
 .choice-icon {
@@ -670,7 +700,65 @@ canvas {
     box-shadow: 4px 4px 0 #000;
 }
 
-/* Allow canvas drag */
+.capture-btn {
+    width: 100%;
+    margin-top: 0.6rem;
+    background-color: #000;
+    color: var(--text-primary);
+    border: 2px solid #000;
+    padding: 0.8rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 4px 4px 0 var(--accent-color);
+    transition: all 0.15s ease;
+}
+
+.capture-btn:hover {
+    background-color: var(--accent-color);
+    color: #fff;
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 #000;
+}
+
+.camera-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.camera-modal-inner {
+    background: #000;
+    border: 4px solid var(--text-primary);
+    box-shadow: 12px 12px 0 var(--accent-color);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    max-width: 95vw;
+}
+
+#camera-video {
+    width: 100%;
+    max-width: 480px;
+    max-height: 60vh;
+    background: #111;
+    display: block;
+}
+
+.camera-modal-actions {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    max-width: 480px;
+}
 #id-canvas {
     cursor: grab;
 }

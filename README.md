@@ -12,17 +12,19 @@ This app allows event attendees, developers, and creators to generate official e
 
 ## 🚀 Live Demo & Quick Start
 
-Simply open `index.html` in any modern web browser or serve it using a local HTTP server:
+This app requires a Node.js backend to quickly and securely process modern iPhone HEIC files.
 
+1. Install backend dependencies:
 ```bash
-# Option 1: Using Python http.server
-python -m http.server 8000
-
-# Option 2: Using Node.js npx serve
-npx serve .
+npm install
 ```
 
-Then visit `http://localhost:8000` in your browser.
+2. Start the server:
+```bash
+node server.js
+```
+
+3. Visit `http://localhost:8080` in your browser.
 
 ---
 
@@ -44,7 +46,7 @@ Then visit `http://localhost:8000` in your browser.
   * 🌴 **Jungle** - Lush tropical greenery
 
 ### 🛠️ Interactive Canvas Controls & Image Tools
-* **Multi-Format Upload**: Supports `JPG`, `PNG`, and automatic client-side `HEIC` conversion using `heic2any`.
+* **Multi-Format Upload**: Supports `JPG`, `PNG`, and extremely fast server-side `HEIC` conversion using `sharp` (bypassing strict `libheif` reference limits on modern iPhone photos), with a client-side `heic2any` fallback.
 * **Real-time Drag & Reposition**: Direct drag-and-drop photo positioning (supports mouse and touch devices).
 * **Transform Sliders**:
   * 🔍 **Zoom / Scale**: Adjust photo magnification (0.5x to 3.0x).
@@ -82,7 +84,8 @@ Then visit `http://localhost:8000` in your browser.
 * **Graphics Rendering**: Native HTML5 `<canvas>` 2D API.
 * **Styles & Layout**: Vanilla CSS3 (Flexbox, CSS Grid, Custom Properties, Glassmorphism).
 * **Fonts**: Google Fonts ([Playfair Display](https://fonts.google.com/specimen/Playfair+Display) & [Space Mono](https://fonts.google.com/specimen/Space+Mono)).
-* **Libraries**: [heic2any](https://github.com/alexcorvi/heic2any) via CDN for browser HEIC conversion.
+* **Backend**: Express.js with `multer` (MemoryStorage) and `sharp` (libvips) for high-performance HEIC processing.
+* **Frontend Libraries**: [heic2any](https://github.com/alexcorvi/heic2any) via CDN as a client-side HEIC fallback.
 
 ---
 
@@ -105,7 +108,3 @@ git push -u origin main
 ```
 
 ---
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
