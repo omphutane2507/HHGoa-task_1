@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Resize image blob to max 1600px before uploading — speeds up server conversion
   async function resizeHeicBeforeUpload(file) {
     // We can't decode HEIC in canvas directly, so just return as-is
-    // heic2any already failed at this point; send original to server
+    // heic-to will be used for conversion later
     // But cap at 15MB to avoid huge transfers
     if (file.size <= 15 * 1024 * 1024) return file;
     // If over 15MB, slice isn't valid for HEIC — just send it anyway
@@ -199,29 +199,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (template === "teamID") {
       if (heroTitle) heroTitle.textContent = "TEAM ID GENERATOR";
-      if (heroSubtitle) heroSubtitle.textContent = "Build together. Ship together. Generate your team card.";
+      if (heroSubtitle)
+        heroSubtitle.textContent =
+          "Build together. Ship together. Generate your team card.";
       if (activeModeBadge) activeModeBadge.textContent = "TEAM ID CARD";
       detailsSection.classList.add("hidden");
       teamDetailsSection.classList.remove("hidden");
-      if (canvasWrapper) { canvasWrapper.classList.remove("square"); canvasWrapper.classList.add("portrait"); }
+      if (canvasWrapper) {
+        canvasWrapper.classList.remove("square");
+        canvasWrapper.classList.add("portrait");
+      }
       canvas.width = 1080;
       canvas.height = 1350;
     } else if (template === "frame") {
       if (heroTitle) heroTitle.textContent = "PFP FRAME GENERATOR";
-      if (heroSubtitle) heroSubtitle.textContent = "Stand out on X. Wrap your photo in branded HH Goa 2026 vibes.";
+      if (heroSubtitle)
+        heroSubtitle.textContent =
+          "Stand out on X. Wrap your photo in branded HH Goa 2026 vibes.";
       if (activeModeBadge) activeModeBadge.textContent = "PFP FRAME";
       detailsSection.classList.add("hidden");
       teamDetailsSection.classList.add("hidden");
-      if (canvasWrapper) { canvasWrapper.classList.remove("portrait"); canvasWrapper.classList.add("square"); }
+      if (canvasWrapper) {
+        canvasWrapper.classList.remove("portrait");
+        canvasWrapper.classList.add("square");
+      }
       canvas.width = 1080;
       canvas.height = 1080;
     } else {
       if (heroTitle) heroTitle.textContent = "BUILDER ID GENERATOR";
-      if (heroSubtitle) heroSubtitle.textContent = "Less Noise. More Signal. Generate your official radar card.";
+      if (heroSubtitle)
+        heroSubtitle.textContent =
+          "Less Noise. More Signal. Generate your official radar card.";
       if (activeModeBadge) activeModeBadge.textContent = "BUILDER ID CARD";
       detailsSection.classList.remove("hidden");
       teamDetailsSection.classList.add("hidden");
-      if (canvasWrapper) { canvasWrapper.classList.remove("square"); canvasWrapper.classList.add("portrait"); }
+      if (canvasWrapper) {
+        canvasWrapper.classList.remove("square");
+        canvasWrapper.classList.add("portrait");
+      }
       canvas.width = 1080;
       canvas.height = 1350;
     }
@@ -262,12 +277,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Team inputs
-  document.getElementById("team-name").addEventListener("input", (e) => { state.teamName = e.target.value; render(); });
+  document.getElementById("team-name").addEventListener("input", (e) => {
+    state.teamName = e.target.value;
+    render();
+  });
   [1, 2, 3].forEach((i) => {
-    document.getElementById(`team-member-${i}`).addEventListener("input", (e) => {
-      state.teamMembers[i - 1] = e.target.value;
-      render();
-    });
+    document
+      .getElementById(`team-member-${i}`)
+      .addEventListener("input", (e) => {
+        state.teamMembers[i - 1] = e.target.value;
+        render();
+      });
   });
 
   // Inputs (Format B only)
@@ -309,6 +329,60 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  async function convertHeicToJpeg(file) {
+    if (!isHeicFile(file)) return file;
+
+    try {
+      const possibleFns = [
+        window.HeicTo,
+        window.heicTo,
+        window.HeicTo && window.HeicTo.heicTo,
+        window.heicTo && window.heicTo.heicTo,
+      ].filter(Boolean);
+
+      for (const fn of possibleFns) {
+        if (typeof fn !== "function") continue;
+
+        const converted = await fn({
+          blob: file,
+          type: "image/jpeg",
+          quality: 0.6,
+        });
+
+        const result = Array.isArray(converted) ? converted[0] : converted;
+        if (result) return result;
+      }
+    } catch (err) {
+      console.warn(
+        "Browser HEIC conversion failed, using server fallback:",
+        err,
+      );
+    }
+
+    const formData = new FormData();
+    formData.append("file", file, file.name);
+
+    const liveServerPort = ["5500", "5501", "5502"].includes(window.location.port);
+    const serverUrl = liveServerPort
+      ? "http://localhost:8080/convert-heic"
+      : "/convert-heic";
+
+    const response = await fetch(serverUrl, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}));
+      throw new Error(
+        payload.error || `HEIC conversion failed (${response.status})`,
+      );
+    }
+
+    const buffer = await response.arrayBuffer();
+    return new Blob([buffer], { type: "image/jpeg" });
+  }
+
   // Photo Upload
   photoUpload.addEventListener("change", async (e) => {
     const file = e.target.files[0];
@@ -318,66 +392,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let blob = file;
     if (isHeicFile(file)) {
-      // Animated converting indicator
       let dots = 0;
       const ticker = setInterval(() => {
         dots = (dots + 1) % 4;
         fileNameDisplay.textContent = "Converting HEIC" + ".".repeat(dots);
       }, 400);
 
-      // Try server-side conversion first (server has native libvips with unlimited refs)
-      let conversionSuccess = false;
       try {
-        const formData = new FormData();
-        formData.append("file", file, file.name);
-
-        const response = await fetch("/convert-heic", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!response.ok) {
-          const errText = await response.text();
-          throw new Error(
-            `Server error: ${response.status} - ${errText.substring(0, 100)}`,
-          );
-        }
-
-        const arrayBuf = await response.arrayBuffer();
-        blob = new Blob([arrayBuf], { type: "image/jpeg" });
-        const outName = response.headers.get("X-File-Name");
+        blob = await convertHeicToJpeg(file);
         clearInterval(ticker);
-        fileNameDisplay.textContent =
-          (outName ? decodeURIComponent(outName) : file.name) + " ✓";
-        conversionSuccess = true;
+        const outName = file.name.replace(/\.(heic|heif)$/i, ".jpg");
+        fileNameDisplay.textContent = outName + " ✓";
       } catch (err) {
-        console.warn("Server conversion failed, trying heic2any...", err);
-        // Fallback to browser-side heic2any if server is unavailable or fails
-        try {
-          if (typeof heic2any !== "undefined") {
-            blob = await heic2any({
-              blob: file,
-              toType: "image/jpeg",
-              quality: 0.6,
-            });
-            if (Array.isArray(blob)) blob = blob[0];
-            clearInterval(ticker);
-            fileNameDisplay.textContent = file.name + " ✓";
-            conversionSuccess = true;
-          } else {
-            throw new Error("heic2any library is not loaded.");
-          }
-        } catch (err2) {
-          clearInterval(ticker);
-          fileNameDisplay.textContent = `HEIC ERROR: ${err2.message || err2}`;
-          return;
-        }
-      }
-
-      if (!conversionSuccess) {
         clearInterval(ticker);
-        fileNameDisplay.textContent =
-          "HEIC conversion failed. Try a JPG or PNG instead.";
+        console.error("HEIC conversion error:", err);
+        fileNameDisplay.textContent = `HEIC ERROR: ${err.message || err}`;
         return;
       }
     }
@@ -498,52 +527,69 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  window.addEventListener("mouseup", () => { isDragging = false; draggingLabel = -1; });
-  canvas.addEventListener("mouseleave", () => { isDragging = false; draggingLabel = -1; });
+  window.addEventListener("mouseup", () => {
+    isDragging = false;
+    draggingLabel = -1;
+  });
+  canvas.addEventListener("mouseleave", () => {
+    isDragging = false;
+    draggingLabel = -1;
+  });
 
   // Touch events
-  canvas.addEventListener("touchstart", (e) => {
-    if (e.touches.length !== 1) return;
-    const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    const ox = touch.clientX - rect.left;
-    const oy = touch.clientY - rect.top;
-    const { cx, cy } = toCanvasCoords(ox, oy);
-    const lbl = hitLabel(cx, cy);
-    if (lbl !== -1) {
-      draggingLabel = lbl;
-      dragStart = { x: ox, y: oy };
-    } else if (state.photo) {
-      isDragging = true;
-      dragStart = { x: ox, y: oy };
-    }
-  }, { passive: true });
+  canvas.addEventListener(
+    "touchstart",
+    (e) => {
+      if (e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const ox = touch.clientX - rect.left;
+      const oy = touch.clientY - rect.top;
+      const { cx, cy } = toCanvasCoords(ox, oy);
+      const lbl = hitLabel(cx, cy);
+      if (lbl !== -1) {
+        draggingLabel = lbl;
+        dragStart = { x: ox, y: oy };
+      } else if (state.photo) {
+        isDragging = true;
+        dragStart = { x: ox, y: oy };
+      }
+    },
+    { passive: true },
+  );
 
-  canvas.addEventListener("touchmove", (e) => {
-    if (e.touches.length !== 1) return;
-    const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    const touchX = touch.clientX - rect.left;
-    const touchY = touch.clientY - rect.top;
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const dx = touchX - dragStart.x;
-    const dy = touchY - dragStart.y;
+  canvas.addEventListener(
+    "touchmove",
+    (e) => {
+      if (e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const touchX = touch.clientX - rect.left;
+      const touchY = touch.clientY - rect.top;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const dx = touchX - dragStart.x;
+      const dy = touchY - dragStart.y;
 
-    if (draggingLabel !== -1) {
-      state.memberPos[draggingLabel].x += dx * scaleX;
-      state.memberPos[draggingLabel].y += dy * scaleY;
-      dragStart = { x: touchX, y: touchY };
-      render();
-    } else if (isDragging) {
-      state.transform.x += dx * scaleX;
-      state.transform.y += dy * scaleY;
-      dragStart = { x: touchX, y: touchY };
-      render();
-    }
-  }, { passive: true });
+      if (draggingLabel !== -1) {
+        state.memberPos[draggingLabel].x += dx * scaleX;
+        state.memberPos[draggingLabel].y += dy * scaleY;
+        dragStart = { x: touchX, y: touchY };
+        render();
+      } else if (isDragging) {
+        state.transform.x += dx * scaleX;
+        state.transform.y += dy * scaleY;
+        dragStart = { x: touchX, y: touchY };
+        render();
+      }
+    },
+    { passive: true },
+  );
 
-  window.addEventListener("touchend", () => { isDragging = false; draggingLabel = -1; });
+  window.addEventListener("touchend", () => {
+    isDragging = false;
+    draggingLabel = -1;
+  });
 
   const form = document.getElementById("generator-form");
   if (form) {
@@ -575,13 +621,21 @@ document.addEventListener("DOMContentLoaded", () => {
       const imgRatio = img.width / img.height;
       const slotRatio = WIDTH / HEIGHT;
       let sW, sH;
-      if (imgRatio > slotRatio) { sW = WIDTH * state.transform.zoom; sH = sW / imgRatio; }
-      else { sH = HEIGHT * state.transform.zoom; sW = sH * imgRatio; }
+      if (imgRatio > slotRatio) {
+        sW = WIDTH * state.transform.zoom;
+        sH = sW / imgRatio;
+      } else {
+        sH = HEIGHT * state.transform.zoom;
+        sW = sH * imgRatio;
+      }
       ctx.save();
       ctx.beginPath();
       ctx.rect(0, 0, WIDTH, HEIGHT);
       ctx.clip();
-      ctx.translate(WIDTH / 2 + state.transform.x, HEIGHT / 2 + state.transform.y);
+      ctx.translate(
+        WIDTH / 2 + state.transform.x,
+        HEIGHT / 2 + state.transform.y,
+      );
       ctx.rotate((state.transform.rotate * Math.PI) / 180);
       if (state.transform.flip) ctx.scale(-1, 1);
       ctx.filter = `brightness(${state.filters.brightness})`;
@@ -598,7 +652,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Format B: Builder ID Card ---
   // Photo slot: top-left (299, 388), size 475x454
   function renderFormatB(WIDTH, HEIGHT) {
-    const pX = 299, pY = 388, pW = 475, pH = 454;
+    const pX = 299,
+      pY = 388,
+      pW = 475,
+      pH = 454;
 
     // 1. Draw background
     ctx.drawImage(bgBuilderID, 0, 0, WIDTH, HEIGHT);
@@ -613,9 +670,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const imgRatio = img.width / img.height;
       const slotRatio = pW / pH;
       let sW, sH;
-      if (imgRatio > slotRatio) { sW = pW * state.transform.zoom; sH = sW / imgRatio; }
-      else { sH = pH * state.transform.zoom; sW = sH * imgRatio; }
-      ctx.translate(pX + pW / 2 + state.transform.x, pY + pH / 2 + state.transform.y);
+      if (imgRatio > slotRatio) {
+        sW = pW * state.transform.zoom;
+        sH = sW / imgRatio;
+      } else {
+        sH = pH * state.transform.zoom;
+        sW = sH * imgRatio;
+      }
+      ctx.translate(
+        pX + pW / 2 + state.transform.x,
+        pY + pH / 2 + state.transform.y,
+      );
       ctx.rotate((state.transform.rotate * Math.PI) / 180);
       if (state.transform.flip) ctx.scale(-1, 1);
       ctx.filter = `brightness(${state.filters.brightness})`;
@@ -733,7 +798,11 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.textAlign = "center";
     ctx.font = '700 48px "Space Mono", monospace';
     ctx.fillStyle = "#f8e31a";
-    ctx.fillText((state.builderName || "NAME").toUpperCase(), WIDTH / 2, slotBottom + 70);
+    ctx.fillText(
+      (state.builderName || "NAME").toUpperCase(),
+      WIDTH / 2,
+      slotBottom + 70,
+    );
 
     ctx.font = '700 34px "Space Mono", monospace';
     ctx.fillStyle = "#116c3b";
@@ -779,15 +848,18 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderFormatC(WIDTH, HEIGHT) {
     ctx.drawImage(bgTeamID, 0, 0, WIDTH, HEIGHT);
 
-    const pX = 129, pY = 328, pW = 822, pH = 534;
+    const pX = 129,
+      pY = 328,
+      pW = 822,
+      pH = 534;
     const r = state.teamPhotoRadius;
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(pX + r, pY);
-    ctx.arcTo(pX + pW, pY,     pX + pW, pY + pH, r);
-    ctx.arcTo(pX + pW, pY + pH, pX,     pY + pH, r);
-    ctx.arcTo(pX,      pY + pH, pX,     pY,      r);
-    ctx.arcTo(pX,      pY,      pX + pW, pY,     r);
+    ctx.arcTo(pX + pW, pY, pX + pW, pY + pH, r);
+    ctx.arcTo(pX + pW, pY + pH, pX, pY + pH, r);
+    ctx.arcTo(pX, pY + pH, pX, pY, r);
+    ctx.arcTo(pX, pY, pX + pW, pY, r);
     ctx.closePath();
     ctx.clip();
     if (state.photo) {
@@ -795,9 +867,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const imgRatio = img.width / img.height;
       const slotRatio = pW / pH;
       let sW, sH;
-      if (imgRatio > slotRatio) { sH = pH * state.transform.zoom; sW = sH * imgRatio; }
-      else { sW = pW * state.transform.zoom; sH = sW / imgRatio; }
-      ctx.translate(pX + pW / 2 + state.transform.x, pY + pH / 2 + state.transform.y);
+      if (imgRatio > slotRatio) {
+        sH = pH * state.transform.zoom;
+        sW = sH * imgRatio;
+      } else {
+        sW = pW * state.transform.zoom;
+        sH = sW / imgRatio;
+      }
+      ctx.translate(
+        pX + pW / 2 + state.transform.x,
+        pY + pH / 2 + state.transform.y,
+      );
       ctx.rotate((state.transform.rotate * Math.PI) / 180);
       if (state.transform.flip) ctx.scale(-1, 1);
       ctx.filter = `brightness(${state.filters.brightness})`;
@@ -864,7 +944,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!generatedImageUrl) return;
     const a = document.createElement("a");
     a.href = generatedImageUrl;
-    const prefix = state.template === "frame" ? "HH_GOA_PFP_FRAME" : state.template === "teamID" ? "HH_GOA_TEAM_ID" : "HH_GOA_BUILDER_ID";
+    const prefix =
+      state.template === "frame"
+        ? "HH_GOA_PFP_FRAME"
+        : state.template === "teamID"
+          ? "HH_GOA_TEAM_ID"
+          : "HH_GOA_BUILDER_ID";
     a.download = `${prefix}_${Date.now()}.png`;
     document.body.appendChild(a);
     a.click();
